@@ -1,0 +1,38 @@
+pycal add 24 apr 13:45 "doomsday" remind 3d,2h
+  -> [#687] 24.04.2013 13:45 (rem. 3d, 2h)
+       doomsday
+
+pycal add 18:00 "dinner" reminder 30m
+  -> [#688] today, 18:00 (rem. 30m)
+       dinner
+ 
+pycal add in 3d 14:00 "water plants" cyclic 3d blur 3h
+  -> [#689] 28.02.2013, 14:00 +/- 2h (no rem., cyclic 3d)
+       water plants
+
+NOTE: times of the form "14:00" are always absolute, just like
+      dates of the form "24 apr"
+
+pycal add every thursday 8:00 "clean house"
+  SHORTHAND: add (date of next thursday) 8:00 "clean house" cyclic 7d
+
+pycal add birthday 24 mar "mother"
+  SHORTHAND: add 24 mar "birthday: mother" remind 2w, 3d, 1d, 12h cyclic 1yr
+
+pycal list
+  -> #687 23.04.2013 doomsday 
+  NOTE: reminder text will be cut appropriately.
+
+pycal show 687
+
+pycal delete 687
+
+pycal grep birthday
+
+(# NOTE: provide zsh completion)
+# NOTE: all keywords may be abbreviated unambiguously
+# NOTE: editing events will not be supported in CLI interface for now.
+
+pycal help
+
+NOTE: support both shelve and redis as backends
