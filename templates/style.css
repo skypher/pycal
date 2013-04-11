@@ -1,0 +1,26 @@
+table.calendar table {
+  table-layout:fixed;
+}
+
+.calendar td {
+  background-color:lightblue;
+}
+
+.calendar.current td {
+  min-width:20px;
+  min-height:20px;
+  width:60px;
+  height:50px;
+}
+
+div.previous_calendars {
+  float:left;
+}
+
+div.current_calendars {
+  float:left;
+}
+
+.calendar td.event {
+  background-color:lightgreen;
+}

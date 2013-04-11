@@ -1,53 +1,39 @@
-import redis
+from event_storage import *
 import time
+
+from datetime import datetime
 from sys import argv
 
-class Priorities:
-    low, normal, high = [10, 20, 30]
+import redis
 
-class Reminders:
-    day_before = -1*24
-    three_days_before = -3*24
-    two_weeks_before = -14*24
-    one_hour_before = -1
-    three_hours_before = -3
 
 # TODO 'every X days'
 def parse_appointment_date (s):
-    target_time = None;
+    target_time = None
 
     for pattern in ["%d", "%d %b", "%d %b %H:%M"]:
         try:
-            target_time = time.strptime(s, pattern)
+            target_time = datetime.strptime(s, pattern)
         except ValueError:
             continue
         break
 
-    target_time.tm_year = time.localtime().tm_year
+    target_time = target_time.replace(year=datetime.today().year)
 
-    if (target_time < time.localtime()):
-        target_time.tm_year += 1
+    if (target_time < datetime.today()):
+        target_time = target_time.replace(year=datetime.today().year+1)
 
-    return result
+    return target_time
 
-def add_appointment(r, time, text, prio=Priorities.low,
-                    reminders=[Reminders.day_before,
-                               Reminders.three_days_before],
-                    cycle=False):
-    uid = r.incr("event:last-uid")
-    r.set("event:TODO-UID:date", date.FIXMEINTVALUE);
-    r.set("event:TODO-UID:text", text);
-    r.lpush("events", uid);
-
-    return True
+r = redis.StrictRedis()
 
 if __name__ == "__main__":
-    r = redis.StrictRedis()
-    if (len.argv == 1):
-        print "TODO: would show N upcoming appointments here"
-        print "if no appointments, show help instead."
+    if (len(argv) == 1):
+        print "Next 3 appointments:"
+        map(print_appointment, get_appointments(r, 3))
+        print "If no appointments, show help instead."
+        print "Example: pycal ..."
     else:
-        date = parse_appointment_date("30 Mar")
-        print date
-        add_appointment(r, date, "test appointment");
+        date = parse_appointment_date(argv[1])
+        print_appointment(add_appointment(r, date, "test appointment"))
 
