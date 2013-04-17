@@ -9,6 +9,30 @@ import operator
 from event_storage import *
 import htmlCalendar
 
+tags = []
+
+class Tag:
+    def __init__(self, name, icon=None):
+        self.name = name
+        self.icon_type, self.icon_data = icon.split(':')
+
+    def __str__(self):
+        return '%s,%s:' % (self.name, self.icon_type, self.icon_data)
+
+    def register(self):
+        tags.append(self)
+
+def find_tag(name):
+    for tag in tags:
+        if tag.name == name:
+            return tag
+    else:
+        return None
+
+Tag('PORT ZERO', 'img:port-zero-fav.png').register()
+Tag('Cloud', 'color:blue').register()
+Tag('Michael', 'color:darkgreen').register()
+
 app = Flask(__name__, static_folder='templates')
 app.config['SIJAX_STATIC_PATH'] = os.path.join('.', os.path.dirname(__file__), 'templates/sijax_js/')
 flask_sijax.Sijax(app)
@@ -41,9 +65,6 @@ def show_month_view():
     cur_cal = make_calendar()
     next_cals = [make_calendar(mo) for mo in range(1,3)]
 
-    # test
-    cur_cal.viewEvent(6, 8, "testev", "Test event")
-
     prev_cals_html = reduce(operator.add, [cal.create() for cal in prev_cals])
     cur_cal_html = cur_cal.create()
     next_cals_html = reduce(operator.add, [cal.create() for cal in next_cals])
@@ -60,11 +81,15 @@ def show_month_view():
     return render_template("cal.html",
                            cals_html=jinja2.Markup(merged_html),
                            events_html=jinja2.Markup(events_html))
+                           tags=tags)
 
 @flask_sijax.route(app, '/add-event')
 def add_event():
     def process_add_event(obj_response, values):
         print values
+        date = map(int, values['date'].split('-'))
+        add_appointment(r, datetime(date[0], date[1], date[2]), values['text'], values['tags'])
+
         obj_response.script("$('#dialog').dialog('close');")
 
     if g.sijax.is_sijax_request:
@@ -80,7 +105,8 @@ def add_event():
         as_dialog = request.args.get('dialog')
         date = request.args.get('date').split('-')
         year, month, day = date
-        return render_template("add-event.html", year=year, month=month, day=day)
+    return render_template("add-event.html", year=year, month=month,
+                           day=day, tags=tags)
 
 app.debug = True
 

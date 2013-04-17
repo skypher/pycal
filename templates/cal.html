@@ -1,5 +1,21 @@
 {% extends "skeleton.html" %}
 {% block content %}
+
+<div class="tags">
+  <ul class="tags">
+      {% for tag in tags %}
+      <li>
+      {% if tag.icon_type == 'img' %}
+      <img src="{{ url_for('static', filename=tag.icon_data) }}"/>
+      {% else %}
+      <div style="background:{{tag.icon_data}}" class="tag_icon"></div>
+      {% endif %}
+      <div style="display:inline">{{tag.name}}</div>
+      </li>
+      {% endfor %}
+  </ul>
+</div>
+
 <div class="calendars">
   {{ cals_html }}
 </div>

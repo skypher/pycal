@@ -147,22 +147,39 @@ class MonthlyCalendar:
 
                 html = '<td'
                 classes = [cls]
+                final_content = ''
 
                 if content != '&nbsp;': #and cls.lower().find('day') != -1:
 			link = self.link
 			eventClass = ''
 			events = []
+                        tags = []
 
+                        final_content += '<ul class="tags">'
 			if self.specDays.has_key(content):
 				for v in self.specDays[content]:
 					if v[0]: eventClass = v[0]
 					if v[1]: events.append(v[1])
 					if v[2]: link = v[2]
+                                        if v[1]:
+                                            tags = tags + v[1]
+                                tags = list(frozenset(tags))
 				html += ' title="' + ' &middot; '.join(events) + '"'
                                 classes.append('event')
-				if eventClass:
-                                    classes.append(eventClass)
+                                for tag in tags:
+                                    if tag.icon_type == 'color':
+                                        background = tag.icon_data
+                                    elif tag.icon_type == 'img':
+                                        background = "url('/templates/%s')" % tag.icon_data
+                                    else:
+                                        raise Exception("Tag icon type must be either 'color' or 'img'!")
+                                    final_content += '<li title="%s" style="background:%s;"></li>' % (tag.name, background)
+                                # TODO append tags to css classes
+				#if eventClass:
+                                #    classes.append(eventClass)
 
+                        final_content += '</ul>'
+                        final_content += '<div class="content">' + content + '</div>'
                         html += (' class="%s"' % reduce(operator.add, intersperse(classes, ' ')))
 			if link:
 				link += (link.find('?') != -1) and '&date=' + date or '?date=' + date
@@ -170,7 +187,7 @@ class MonthlyCalendar:
 				html += ' onMouseOut="this.className=\'' + cls + '\'"'
 				html += ' onClick="' + self.linkTarget + '.location.href=\'' + link + '\'"'
 		if style: html += ' style="' + style + '"'
-		html += '>' + content + '</td>'
+		html += '>' + final_content + '</td>'
 		return html
 
 	def table_head(self, content):
@@ -188,7 +205,7 @@ class MonthlyCalendar:
                 html += '</thead>'
 		return html
 
-	def viewEvent(self, start, end, color, title, link = ''):
+	def viewEvent(self, start, end, title, tags=[]):
 		"""add event to calendar"""
 		if start > end: return
 		if start < 1 or start > 31: return
@@ -198,11 +215,11 @@ class MonthlyCalendar:
 			self.specDays[str(start)].append((color, title, link))
 			start += 1
 
-	def viewEventEach(self, weekday, color, title, link = ''):
+	def viewEventEach(self, weekday, title, tags=[]):
 		"""add event to calendar"""
 		if weekday < 0 or weekday > 6: return
 		if not self.specDays2.has_key(str(weekday)): self.specDays2[str(weekday)] = []
-		self.specDays2[str(weekday)].append((color, title, link))
+		self.specDays2[str(weekday)].append((title, tags))
 
 	def create(self):
 		"""create monthly calendar"""

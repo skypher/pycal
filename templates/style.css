@@ -24,3 +24,21 @@ div.current_calendars {
 .calendar td.event {
   background-color:lightgreen;
 }
+.tag_icon {
+  width:16px;
+  height:16px;
+  display:inline-block;
+}
+
+ul.tags li {
+  display:inline;
+}
+
+.calendar.current ul.tags li {
+  width:16px;
+  height:16px;
+  display:block;
+  float:left;
+  margin:2px 2px;
+  white-space:nowrap;
+}

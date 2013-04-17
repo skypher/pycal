@@ -1,7 +1,22 @@
 <h1>Add Event</h1>
 <form action="/add-event" method="POST" onsubmit="return processAjaxForm(this);">
     Date: {{ year }}-{{ month }}-{{ day }}
-    <input class = type="text" name="text"/>
+    <ul class="tags">
+        {% for tag in tags %}
+        <li>
+            <input type="checkbox" name="tags[]" value="{{tag.name}}"/>
+            <label>
+                {% if tag.icon_type == 'img' %}
+                <img src="{{ url_for('static', filename=tag.icon_data) }}"/>
+                {% else %}
+                <div style="background:{{tag.icon_data}}" class="tag_icon"/>
+                {% endif %}
+                {{tag.name}}
+            </label>
+        </li>
+        {% endfor %}
+    </ul>
+    <input class="text" type="text" name="text"/>
     <input type="hidden" name="action" value="add"/>
     <input type="submit" value="Add Event"/>
 </form>
