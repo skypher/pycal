@@ -54,6 +54,9 @@ def get_appointment(r, id):
 def get_appointments(r, limit=-1, id_only=False):
     events = r.lrange('events', 0, limit)
 
+    if events is None:
+        return []
+
     if id_only is True:
         return map(int, events)
     return [get_appointment(r, int(event)) for event in events]

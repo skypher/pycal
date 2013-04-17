@@ -1,9 +1,13 @@
-table.calendar table {
+
+table.calendar {
   table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:3px;
 }
 
 .calendar td {
   background-color:lightblue;
+  border:1px solid gray;
 }
 
 .calendar.current td {
@@ -24,6 +28,21 @@ div.current_calendars {
 .calendar td.event {
   background-color:lightgreen;
 }
+
+.calendar td ul {
+  height:16px;
+}
+
+.calendar div.actions {
+  height:16px;
+  text-align:right;
+}
+
+.calendar td .content {
+  width:100%;
+  text-align:center;
+}
+
 .tag_icon {
   width:16px;
   height:16px;
@@ -42,3 +61,23 @@ ul.tags li {
   margin:2px 2px;
   white-space:nowrap;
 }
+
+.calendar.current .content {
+  text-align:center;
+  font-size:2em;
+}
+
+
+.calendar div.actions .add {
+  display:block;
+  visibility:hidden;
+  float:right;
+  width:16px;
+  height:16px;
+  background:url('/templates/icons/add.png');
+}
+/*
+.calendar td.hover div.actions a.add {
+  visibility:visible;
+}
+*/

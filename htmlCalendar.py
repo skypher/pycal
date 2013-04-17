@@ -141,16 +141,19 @@ class MonthlyCalendar:
 
 		return int(math.floor((days + firstWDay) / 7) + (firstWDay <= 3))
 
-	def table_cell(self, content, cls = '', date = '', style = ''):
+	def table_cell(self, content, cls = '', date = '', style = '', header=False):
 		"""return formatted table cell with content"""
 		size = int(round(self.__size * 1.5))
 
-                html = '<td'
+                if header:
+                    html = '<th'
+                else:
+                    html = '<td'
+
                 classes = [cls]
                 final_content = ''
 
                 if content != '&nbsp;': #and cls.lower().find('day') != -1:
-			link = self.link
 			eventClass = ''
 			events = []
                         tags = []
@@ -158,9 +161,7 @@ class MonthlyCalendar:
                         final_content += '<ul class="tags">'
 			if self.specDays.has_key(content):
 				for v in self.specDays[content]:
-					if v[0]: eventClass = v[0]
-					if v[1]: events.append(v[1])
-					if v[2]: link = v[2]
+					events.append(v[0])
                                         if v[1]:
                                             tags = tags + v[1]
                                 tags = list(frozenset(tags))
@@ -179,13 +180,19 @@ class MonthlyCalendar:
                                 #    classes.append(eventClass)
 
                         final_content += '</ul>'
+
                         final_content += '<div class="content">' + content + '</div>'
+
                         html += (' class="%s"' % reduce(operator.add, intersperse(classes, ' ')))
-			if link:
-				link += (link.find('?') != -1) and '&date=' + date or '?date=' + date
-				html += ' onMouseOver="this.className=\'cssHilight' + str(globals()['cal_ID']) + '\'"'
-				html += ' onMouseOut="this.className=\'' + cls + '\'"'
-				html += ' onClick="' + self.linkTarget + '.location.href=\'' + link + '\'"'
+
+                        final_content += '<div class="actions">'
+                        if cls != 'week' and header == False: # not supported yet
+                            day = int(content)
+                            final_content += (('<a class="add" href="#"' +
+                                                  'onclick="addEvent(%d,%d,%d);"></a>') %
+                                              (self.year, self.month, day))
+                        final_content += '</div>'
+
 		if style: html += ' style="' + style + '"'
 		html += '>' + final_content + '</td>'
 		return html
@@ -199,8 +206,8 @@ class MonthlyCalendar:
 		for i in range(len(self.weekdays)):
 			ind = (i + self.offset) % 7
 			wDay = self.weekdays[ind]
-			html += self.table_cell(wDay)
-		if self.weekNumbers: html += self.table_cell('KW')
+			html += self.table_cell(wDay, header=True)
+		if self.weekNumbers: html += self.table_cell('KW', header=True)
 		html += '</tr>'
                 html += '</thead>'
 		return html
@@ -212,7 +219,7 @@ class MonthlyCalendar:
 		if end < 1 or end > 31: return
 		while start <= end:
 			if not self.specDays.has_key(str(start)): self.specDays[str(start)] = []
-			self.specDays[str(start)].append((color, title, link))
+			self.specDays[str(start)].append((title, tags))
 			start += 1
 
 	def viewEventEach(self, weekday, title, tags=[]):
@@ -277,8 +284,6 @@ class MonthlyCalendar:
 					if (daycount == 1 and i < start) or daycount > stop: content = '&nbsp;'
 					else:
 						content = str(daycount)
-                                                content += ('<a class="add-event" href="#" onclick="addEvent(%d,%d,%d);">+</a>' %
-                                                            (self.year, self.month, daycount))
 						if inThisMonth and daycount == curDay:
 							style = 'padding:0px;border:3px solid ' + self.tdBorderColor + ';'
 						elif self.year == 1582 and self.month == 10 and daycount == 4: daycount = 14

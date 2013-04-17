@@ -17,6 +17,7 @@
         {% endfor %}
     </ul>
     <input class="text" type="text" name="text"/>
+    <input type="hidden" name="date" value="{{year}}-{{month}}-{{day}}"/>
     <input type="hidden" name="action" value="add"/>
     <input type="submit" value="Add Event"/>
 </form>

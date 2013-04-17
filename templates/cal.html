@@ -19,7 +19,13 @@
 <div class="calendars">
   {{ cals_html }}
 </div>
+
+<div style="clear:both"/>
+
 <div class="events">
-  {{ events_html }}
+  {% for event in events %}
+  <div class="event">{{event.text}}</div>
+  {% endfor %}
 </div>
+
 {% endblock %}

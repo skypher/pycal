@@ -7,6 +7,7 @@ import time
 import operator
 
 from event_storage import *
+from datetime import datetime
 import htmlCalendar
 
 tags = []
@@ -49,16 +50,20 @@ def show_month_view():
         cur_year = time.localtime().tm_year
         cur_mon = time.localtime().tm_mon
         # modular arithmetic with some minor adjustments
-        offset_month = ((cur_mon + month_offset - 1) % 12) + 1
-        offset_year = cur_year + ((cur_mon + month_offset - 1) // 12)
+        effective_month = ((cur_mon + month_offset - 1) % 12) + 1
+        effective_year = cur_year + ((cur_mon + month_offset - 1) // 12)
 
         cal = None
         if month_offset == 0:
-            cal = htmlCalendar.MonthlyCalendar(offset_year, offset_month, cssClass='current')
+            cal = htmlCalendar.MonthlyCalendar(effective_year, effective_month, cssClass='current')
         else:
-            cal = htmlCalendar.MonthlyCalendar(offset_year, offset_month)
+            cal = htmlCalendar.MonthlyCalendar(effective_year, effective_month)
 
-        cal.offset = 2
+        for app in get_appointments_for_month(r, effective_month):
+            cal.viewEvent(app.datetime.day, app.datetime.day, app.text,
+                          [find_tag(name) for name in app.tags])
+
+        cal.offset = 2 # week starts on Monday
         return cal
 
     prev_cals = [make_calendar(mo) for mo in range(-2,0)]
@@ -73,14 +78,9 @@ def show_month_view():
     merged_html += '<div class="current_calendars">' + cur_cal_html + '</div>';
     merged_html += '<div class="next_calendars">' + next_cals_html + '</div>';
 
-    global r
-    events_html = ''
-    for event in get_appointments(r):
-        events_html += '<div class="event">%s</div>' % event.text
-
     return render_template("cal.html",
                            cals_html=jinja2.Markup(merged_html),
-                           events_html=jinja2.Markup(events_html))
+                           events=get_appointments(r),
                            tags=tags)
 
 @flask_sijax.route(app, '/add-event')
@@ -96,15 +96,10 @@ def add_event():
         g.sijax.register_callback('process_add_event', process_add_event)
         return g.sijax.process_request()
 
-    action = request.args.get('action')
-    if action == 'add':
-        #js = 
-        #return render_template('html-response.html', js=js)
-        return '<script type="text/javascript">$("#dialog").close();'
-    else:
-        as_dialog = request.args.get('dialog')
-        date = request.args.get('date').split('-')
-        year, month, day = date
+    as_dialog = request.args.get('dialog')
+    date = request.args.get('date').split('-')
+    year, month, day = date
+
     return render_template("add-event.html", year=year, month=month,
                            day=day, tags=tags)
 
