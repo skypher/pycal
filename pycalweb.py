@@ -66,7 +66,7 @@ def show_month_view():
         cal.offset = 2 # week starts on Monday
         return cal
 
-    prev_cals = [make_calendar(mo) for mo in range(-2,0)]
+    prev_cals = [make_calendar(mo) for mo in range(-1,0)]
     cur_cal = make_calendar()
     next_cals = [make_calendar(mo) for mo in range(1,3)]
 
@@ -91,6 +91,7 @@ def add_event():
         add_appointment(r, datetime(date[0], date[1], date[2]), values['text'], values['tags'])
 
         obj_response.script("$('#dialog').dialog('close');")
+        obj_response.script("location.reload();")
 
     if g.sijax.is_sijax_request:
         g.sijax.register_callback('process_add_event', process_add_event)

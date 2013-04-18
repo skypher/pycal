@@ -8,6 +8,8 @@ table.calendar {
 .calendar td {
   background-color:lightblue;
   border:1px solid gray;
+  width:10px;
+  height:8px;
 }
 
 .calendar.current td {
@@ -63,6 +65,7 @@ ul.tags li {
 }
 
 .calendar.current .content {
+  clear:both;
   text-align:center;
   font-size:2em;
 }
