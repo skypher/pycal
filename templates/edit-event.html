@@ -1,5 +1,5 @@
-<h1>Add Event</h1>
-<form action="/add-event" method="POST" onsubmit="return processAddForm(this);">
+<h1>Edit Event (WIP)</h1>
+<form action="/edit-event" method="POST" onsubmit="return processEditForm(this);">
     Date: {{ year }}-{{ month }}-{{ day }}
     <ul class="tags">
         {% for tag in tags %}
@@ -19,5 +19,5 @@
     <input class="text" type="text" name="text"/>
     <input type="hidden" name="date" value="{{year}}-{{month}}-{{day}}"/>
     <input type="hidden" name="action" value="add"/>
-    <input type="submit" value="Add Event"/>
+    <input type="submit" value="Edit Event"/>
 </form>

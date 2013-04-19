@@ -29,8 +29,9 @@ r = redis.StrictRedis()
 
 if __name__ == "__main__":
     if (len(argv) == 1):
-        print "Next 3 appointments:"
-        map(print_appointment, get_appointments(r, 3))
+        #print "Next 3 appointments:"
+        #map(print_appointment, get_appointments(r, 3))
+        map(print_appointment, get_appointments(r))
         print "If no appointments, show help instead."
         print "Example: pycal ..."
     else:

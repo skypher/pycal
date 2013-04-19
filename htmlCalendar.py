@@ -32,6 +32,8 @@
 import time
 import math
 import operator
+import cgi
+import json
 
 def intersperse(iterable, delimiter):
     it = iter(iterable)
@@ -141,17 +143,20 @@ class MonthlyCalendar:
 
 		return int(math.floor((days + firstWDay) / 7) + (firstWDay <= 3))
 
-	def table_cell(self, content, cls = '', date = '', style = '', header=False):
+	def table_cell(self, content, classes = '', date = '', header=False):
 		"""return formatted table cell with content"""
 		size = int(round(self.__size * 1.5))
+
+                if isinstance(classes, basestring):
+                    classes = [classes]
 
                 if header:
                     html = '<th'
                 else:
                     html = '<td'
 
-                classes = [cls]
                 final_content = ''
+                event_info = []
 
                 if content != '&nbsp;': #and cls.lower().find('day') != -1:
 			eventClass = ''
@@ -159,14 +164,18 @@ class MonthlyCalendar:
                         tags = []
 
                         final_content += '<ul class="tags">'
+
 			if self.specDays.has_key(content):
 				for v in self.specDays[content]:
 					events.append(v[0])
                                         if v[1]:
-                                            tags = tags + v[1]
+                                            tags += v[1]
+                                        event_info.append({'event':v[0], 'tags':[tag.name for tag in v[1]]})
+
                                 tags = list(frozenset(tags))
-				html += ' title="' + ' &middot; '.join(events) + '"'
+
                                 classes.append('event')
+
                                 for tag in tags:
                                     if tag.icon_type == 'color':
                                         background = tag.icon_data
@@ -174,7 +183,7 @@ class MonthlyCalendar:
                                         background = "url('/templates/%s')" % tag.icon_data
                                     else:
                                         raise Exception("Tag icon type must be either 'color' or 'img'!")
-                                    final_content += '<li title="%s" style="background:%s;"></li>' % (tag.name, background)
+                                    final_content += '<li style="background:%s;"></li>' % background
                                 # TODO append tags to css classes
 				#if eventClass:
                                 #    classes.append(eventClass)
@@ -183,17 +192,21 @@ class MonthlyCalendar:
 
                         final_content += '<div class="content">' + content + '</div>'
 
-                        html += (' class="%s"' % reduce(operator.add, intersperse(classes, ' ')))
+                        if 'week' not in classes and header == False: # not supported yet
+                            day = int(content)
+                            if events:
+                                click_behavior = 'edit'
+                            else:
+                                click_behavior = 'add'
+                            html += (' onclick="%sEvent(%d,%d,%d);"' %
+                                     (click_behavior, self.year, self.month, day))
 
                         final_content += '<div class="actions">'
-                        if cls != 'week' and header == False: # not supported yet
-                            day = int(content)
-                            final_content += (('<a class="add" href="#"' +
-                                                  'onclick="addEvent(%d,%d,%d);"></a>') %
-                                              (self.year, self.month, day))
                         final_content += '</div>'
 
-		if style: html += ' style="' + style + '"'
+                html += (' class="%s"' % reduce(operator.add, intersperse(classes, ' ')))
+                if event_info:
+                    html += ' event-info="%s"' % cgi.escape(json.dumps(event_info))
 		html += '>' + final_content + '</td>'
 		return html
 
@@ -273,32 +286,40 @@ class MonthlyCalendar:
 				wdays = 0
 
 				for i in range(len(self.weekdays)):
+                                        cls = []
 					ind = (i + self.offset) % 7
-					if ind == 0: cls = 'Sa'
-					elif ind == 1: cls = 'Su'
-					else: cls = self.weekdays[i]
+					if ind == 0: cls.append('Sa')
+					elif ind == 1: cls.append('Su')
+					else: cls.append(self.weekdays[i])
 
-					style = ''
 					date = "%4d-%02d-%02d" % (self.year, self.month, daycount)
 
-					if (daycount == 1 and i < start) or daycount > stop: content = '&nbsp;'
+					if (daycount == 1 and i < start) or daycount > stop:
+                                            content = '&nbsp;'
+                                            cls.append('empty')
 					else:
 						content = str(daycount)
 						if inThisMonth and daycount == curDay:
-							style = 'padding:0px;border:3px solid ' + self.tdBorderColor + ';'
-						elif self.year == 1582 and self.month == 10 and daycount == 4: daycount = 14
+						    cls.append('current')
+						elif self.year == 1582 and self.month == 10 and daycount == 4:
+                                                    daycount = 14
 						daycount += 1
 						wdays += 1
 
-					html += self.table_cell(content, cls, date, style)
+					html += self.table_cell(content, cls, date)
 
 				if self.weekNumbers:
 					if not weekNr:
-						if self.year == 1: content = '&nbsp;'
-						elif self.year == 1583: content = '51'
-						else: content = str(self.get_week(self.year - 1, 365))
-					elif self.month == 12 and weekNr >= 52 and wdays < 4: content = '1'
-					else: content = str(weekNr)
+						if self.year == 1:
+                                                    content = '&nbsp;'
+						elif self.year == 1583:
+                                                    content = '51'
+						else:
+                                                    content = str(self.get_week(self.year - 1, 365))
+					elif self.month == 12 and weekNr >= 52 and wdays < 4:
+                                            content = '1'
+					else:
+                                            content = str(weekNr)
 
 					html += self.table_cell(content, 'week')
 					weekNr += 1

@@ -68,9 +68,9 @@ def show_month_view():
 
     prev_cals = [make_calendar(mo) for mo in range(-1,0)]
     cur_cal = make_calendar()
-    next_cals = [make_calendar(mo) for mo in range(1,3)]
+    next_cals = [make_calendar(mo) for mo in range(1,2)]
 
-    prev_cals_html = reduce(operator.add, [cal.create() for cal in prev_cals])
+    prev_cals_html = ''#reduce(operator.add, [cal.create() for cal in prev_cals])
     cur_cal_html = cur_cal.create()
     next_cals_html = reduce(operator.add, [cal.create() for cal in next_cals])
 
@@ -102,6 +102,29 @@ def add_event():
     year, month, day = date
 
     return render_template("add-event.html", year=year, month=month,
+                           day=day, tags=tags)
+
+@flask_sijax.route(app, '/edit-event')
+def edit_event():
+    def process_edit_event(obj_response, values):
+        print values
+        date = map(int, values['date'].split('-'))
+
+        # STUB
+        # delete, add event
+
+        obj_response.script("$('#dialog').dialog('close');")
+        obj_response.script("location.reload();")
+
+    if g.sijax.is_sijax_request:
+        g.sijax.register_callback('process_edit_event', process_edit_event)
+        return g.sijax.process_request()
+
+    as_dialog = request.args.get('dialog')
+    date = request.args.get('date').split('-')
+    year, month, day = date
+
+    return render_template("edit-event.html", year=year, month=month,
                            day=day, tags=tags)
 
 app.debug = True
